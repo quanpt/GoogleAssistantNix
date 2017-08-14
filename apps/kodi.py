@@ -3,7 +3,8 @@ from enum import Enum
 import urllib.request, json
 import warnings, logging as l
 
-l.basicConfig(level=l.DEBUG)
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+l.basicConfig(level=l.DEBUG, format=FORMAT)
 warnings.filterwarnings("ignore", category=UserWarning, module='urllib')
 
 # search param
@@ -78,8 +79,16 @@ def executeCommand(param):
                 playAlbum(album)
 
 def playAlbum(album):
-    l.info('  playAlbum: {}'.format(album))
+    l.info(album)
+    paramOpen = {"jsonrpc":"2.0","id":1,"method":"Player.Open","params":{"item":{"albumid":album['albumid']}}}
+    result = requestKodiRpc(paramOpen)
+    l.info('result: {}'.format(result))
 
+def playArtist(artist):
+    l.info('  playArtist: {}'.format(album))
+    paramOpen = {"jsonrpc":"2.0","id":1,"method":"Player.Open","params":{"item":{"albumid":album['albumid']}}}
+    result = requestKodiRpc(paramOpen)
+    l.info('  playArtist result: {}'.format(result))
 
 def main():
     initDatabase()
