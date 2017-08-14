@@ -48,6 +48,7 @@ def process_event(event, assistant):
         spokenText = event.args['text']
         if kodi.isValidCommand(spokenText):
             kodi.executeCommand(spokenText)
+            assistant.stop_conversation()
 
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
@@ -72,6 +73,8 @@ def main():
 
     with Assistant(credentials) as assistant:
         assistant.set_mic_mute(False)
+        kodi.initDatabase()
+        kodi.printVoiceCommand()
         for event in assistant.start():
             process_event(event, assistant)
 

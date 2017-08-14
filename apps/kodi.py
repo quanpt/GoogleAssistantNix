@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-import urllib.request, json
+import urllib.request, json, random
 import warnings, logging as l
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
@@ -8,6 +8,7 @@ l.basicConfig(level=l.DEBUG, format=FORMAT)
 warnings.filterwarnings("ignore", category=UserWarning, module='urllib')
 
 # search param
+_cmd = ''
 _searchType = None
 _album = None
 _artist = None
@@ -21,6 +22,15 @@ class SearchType(Enum):
     ALBUM = 1
     ARTIST = 2
     ALBUM_ARTIST = 3
+
+class VoiceCommand(Enum):
+    ALBUM = r'play album (.*) please'
+    ARTIST = r'play artist (.*) please'
+
+def printVoiceCommand():
+    print("Available voice command:")
+    for cmd in VoiceCommand:
+        print('    {}'.format(cmd.value))
 
 def requestKodiRpc(paramDict):
     params = json.dumps(paramDict).encode('utf8')
@@ -54,16 +64,17 @@ def initConversation():
     _artist = None
 
 def isValidCommand(spokenText):
-    global _searchType, _album, _artist
+    global _cmd, _searchType, _album, _artist
+    _cmd = spokenText
     initConversation()
 
-    artist = re.search(r'play artist (.*) please', spokenText)
+    artist = re.search(VoiceCommand.ARTIST.value, _cmd)
     if artist is not None:
         _artist = artist.group(1)
         _searchType = SearchType.ARTIST
         return True
 
-    album = re.search(r'play album (.*) please', spokenText)
+    album = re.search(VoiceCommand.ALBUM.value, _cmd)
     if album is not None:
         _album = album.group(1)
         _searchType = SearchType.ALBUM
@@ -71,24 +82,34 @@ def isValidCommand(spokenText):
 
     return False
 
-def executeCommand(param):
+def executeCommand():
+
     print([_searchType, _album, _artist])
+
     if _searchType == SearchType.ALBUM:
         for album in _allAlbums:
             if album['label'].find(_album) >= 0:
                 playAlbum(album)
+                return
+
+    if _searchType == SearchType.ARTIST:
+        artistAlbum = []
+        for album in _allAlbums:
+            for artist in album['artist']:
+                if artist.find(_artist) >= 0:
+                    artistAlbum.append(album)
+                    break
+        if len(artistAlbum) > 0:
+            playAlbum(random.choice(artistAlbum))
+            return
+
+    l.info("Cannot execute: {}".format(_cmd))
 
 def playAlbum(album):
     l.info(album)
     paramOpen = {"jsonrpc":"2.0","id":1,"method":"Player.Open","params":{"item":{"albumid":album['albumid']}}}
     result = requestKodiRpc(paramOpen)
     l.info('result: {}'.format(result))
-
-def playArtist(artist):
-    l.info('  playArtist: {}'.format(album))
-    paramOpen = {"jsonrpc":"2.0","id":1,"method":"Player.Open","params":{"item":{"albumid":album['albumid']}}}
-    result = requestKodiRpc(paramOpen)
-    l.info('  playArtist result: {}'.format(result))
 
 def main():
     initDatabase()
@@ -98,7 +119,7 @@ play album Relaxation Music Orchestra please""".split('\n')
     for cmd in cmds:
         print(cmd)
         if isValidCommand(cmd):
-            executeCommand(cmd)
+            executeCommand()
 
 if __name__ == '__main__':
     main()
