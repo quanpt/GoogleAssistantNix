@@ -20,22 +20,22 @@ from __future__ import print_function
 import argparse
 import os.path
 import json
-import re
 
 import google.oauth2.credentials
 
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
-from googlesamples.assistant.grpc import audio_helpers
 
 from apps import kodi
 from sound import amixer
+from voice import command
 
 import logging as l
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 l.basicConfig(level=l.ERROR, format=FORMAT)
+
 
 def process_event(event, assistant):
     """Pretty prints events.
@@ -48,24 +48,24 @@ def process_event(event, assistant):
     """
     if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
         print("Listening ...")
-        amixer.setLowSoundLevel()
+        amixer.set_low_sound_level()
 
     l.info(event)
 
     if event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED:
-        amixer.restoreSoundLevel()
+        amixer.restore_sound_level()
         spokenText = event.args['text']
         print("Command: {}".format(spokenText))
-        if kodi.isValidCommand(spokenText):
+        if kodi.is_valid_command(spokenText):
             print("  executing  ")
-            kodi.executeCommand()
+            kodi.execute_command()
             assistant.stop_conversation()
         else:
             print("  use Google Assistant")
 
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
-        print()
+        print('Done')
 
 
 def main():
@@ -86,8 +86,8 @@ def main():
 
     with Assistant(credentials) as assistant:
         assistant.set_mic_mute(False)
-        kodi.initDatabase()
-        kodi.printVoiceCommand()
+        kodi.init_database()
+        command.VoiceCommand.print_voice_command()
         for event in assistant.start():
             process_event(event, assistant)
 
