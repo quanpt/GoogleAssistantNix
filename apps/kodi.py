@@ -1,6 +1,8 @@
 import re, sys
 import urllib.request, json, random
 import warnings, logging as l
+from subprocess import check_output, CalledProcessError
+
 
 sys.path.append('../')
 from voice.command import VoiceCommand
@@ -20,6 +22,13 @@ _kodi_url = "http://localhost:8080/jsonrpc"
 _allAlbums = []
 
 
+def get_pid(name):
+    try:
+        return check_output(["pidof",name])
+    except CalledProcessError:
+        return -1
+
+
 def request_kodi_rpc(param_dict):
     params = json.dumps(param_dict).encode('utf8')
     req = urllib.request.Request(_kodi_url, data=params,
@@ -32,6 +41,11 @@ def request_kodi_rpc(param_dict):
 
 def init_database():
     global _allAlbums
+
+    if get_pid('kodi') < 0:
+        print('Error: please start Kodi first')
+        sys.exit(-1)
+
     # https://stackoverflow.com/questions/44239822/urllib-request-urlopenurl-with-authentication
     password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
     password_mgr.add_password(None, _kodi_url, 'kodi', 'doki')
