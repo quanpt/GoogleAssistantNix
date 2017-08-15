@@ -4,6 +4,7 @@ import warnings, logging as l
 
 sys.path.append('../')
 from voice.command import VoiceCommand
+from sound import amixer
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 l.basicConfig(level=l.ERROR, format=FORMAT)
@@ -101,6 +102,18 @@ def execute_command():
     if _searchType == VoiceCommand.SHOW_ALBUM:
         for _ in range(10):
             print(random.choice([album['label'] for album in _allAlbums]))
+        return
+
+    if _searchType == VoiceCommand.PLAY_RANDOM:
+        play_album(random.choice(_allAlbums))
+        return
+
+    if _searchType == VoiceCommand.VOLUME_UP:
+        amixer.volume_up()
+        return
+
+    if _searchType == VoiceCommand.VOLUME_DOWN:
+        amixer.volume_down()
         return
 
     if _searchType == VoiceCommand.HELP:

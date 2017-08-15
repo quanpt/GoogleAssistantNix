@@ -6,6 +6,9 @@ class VoiceCommand(Enum):
     ARTIST = r'play singer (.*)'
     SHOW_ARTIST = r'show me some singers'
     SHOW_ALBUM = r'show me some songs'
+    PLAY_RANDOM = r'play some random songs'
+    VOLUME_UP = r'volume up'
+    VOLUME_DOWN = r'volume down'
     HELP = r'help'
 
     @staticmethod

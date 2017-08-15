@@ -25,6 +25,18 @@ def restore_sound_level():
         subprocess.run(["amixer", "-D", "pulse", "sset", "Master", str(_currentSoundLevel)], stdout=FNULL, stderr=subprocess.STDOUT)
 
 
+def volume_up():
+    global _currentSoundLevel
+    _currentSoundLevel *= 1.2
+    print("Sound level: {}".format(_currentSoundLevel))
+
+
+def volume_down():
+    global _currentSoundLevel
+    _currentSoundLevel *= 0.8
+    print("Sound level: {}".format(_currentSoundLevel))
+
+
 if __name__ == '__main__':
     save_sound_level()
     print(get_sound_level())

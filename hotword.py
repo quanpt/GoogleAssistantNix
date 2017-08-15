@@ -53,15 +53,15 @@ def process_event(event, assistant):
     l.info(event)
 
     if event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED:
-        amixer.restore_sound_level()
-        spokenText = event.args['text']
-        print("Command: {}".format(spokenText))
-        if kodi.is_valid_command(spokenText):
+        spoken_text = event.args['text']
+        print("Command: {}".format(spoken_text))
+        if kodi.is_valid_command(spoken_text):
             print("  executing  ")
             kodi.execute_command()
             assistant.stop_conversation()
         else:
             print("  use Google Assistant")
+        amixer.restore_sound_level()
 
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
