@@ -4,7 +4,7 @@ import urllib.request, json, random
 import warnings, logging as l
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-l.basicConfig(level=l.DEBUG, format=FORMAT)
+l.basicConfig(level=l.ERROR, format=FORMAT)
 warnings.filterwarnings("ignore", category=UserWarning, module='urllib')
 
 # search param
@@ -18,14 +18,13 @@ kodiUrl = "http://localhost:8080/jsonrpc"
 _allAlbums = None
 
 
-class SearchType(Enum):
-    ALBUM = 1
-    ARTIST = 2
-    ALBUM_ARTIST = 3
 
 class VoiceCommand(Enum):
-    ALBUM = r'play album (.*) please'
-    ARTIST = r'play artist (.*) please'
+    ALBUM = r'play song (.*)'
+    ARTIST = r'play singer (.*)'
+    SHOW_ARTIST = r'show me some singers'
+    SHOW_ALBUM = r'show me some songs'
+    HELP = r'help'
 
 def printVoiceCommand():
     print("Available voice command:")
@@ -68,42 +67,75 @@ def isValidCommand(spokenText):
     _cmd = spokenText
     initConversation()
 
-    artist = re.search(VoiceCommand.ARTIST.value, _cmd)
+    artist = re.search(VoiceCommand.ARTIST.value, _cmd, flags=re.IGNORECASE)
     if artist is not None:
-        _artist = artist.group(1)
-        _searchType = SearchType.ARTIST
+        _artist = artist.group(1).lower()
+        _searchType = VoiceCommand.ARTIST
         return True
 
-    album = re.search(VoiceCommand.ALBUM.value, _cmd)
+    album = re.search(VoiceCommand.ALBUM.value, _cmd, flags=re.IGNORECASE)
     if album is not None:
-        _album = album.group(1)
-        _searchType = SearchType.ALBUM
+        _album = album.group(1).lower()
+        _searchType = VoiceCommand.ALBUM
+        return True
+
+    if re.search(VoiceCommand.SHOW_ARTIST.value, _cmd, flags=re.IGNORECASE):
+        _searchType = VoiceCommand.SHOW_ARTIST
+        return True
+
+    if re.search(VoiceCommand.SHOW_ALBUM.value, _cmd, flags=re.IGNORECASE):
+        _searchType = VoiceCommand.SHOW_ALBUM
+        return True
+
+    if re.search(VoiceCommand.HELP.value, _cmd, flags=re.IGNORECASE):
+        _searchType = VoiceCommand.HELP
         return True
 
     return False
 
 def executeCommand():
 
-    print([_searchType, _album, _artist])
+    l.info([_searchType, _album, _artist])
 
-    if _searchType == SearchType.ALBUM:
+    if _searchType == VoiceCommand.ALBUM:
         for album in _allAlbums:
-            if album['label'].find(_album) >= 0:
+            if re.search(_album, album['label'], re.IGNORECASE):
                 playAlbum(album)
                 return
 
-    if _searchType == SearchType.ARTIST:
+    if _searchType == VoiceCommand.ARTIST:
         artistAlbum = []
         for album in _allAlbums:
             for artist in album['artist']:
-                if artist.find(_artist) >= 0:
+                if re.search(_artist, artist, re.IGNORECASE):
                     artistAlbum.append(album)
                     break
         if len(artistAlbum) > 0:
             playAlbum(random.choice(artistAlbum))
             return
 
-    l.info("Cannot execute: {}".format(_cmd))
+    if _searchType == VoiceCommand.SHOW_ARTIST:
+        artists = []
+        output = set()
+        for x in [album['artist'] for album in _allAlbums]:
+            for y in x:
+                output.add(y)
+        artistList = list(output)
+        for id in range(10):
+            print(random.choice(artistList))
+        return
+
+    if _searchType == VoiceCommand.SHOW_ALBUM:
+        artists = []
+        for id in range(10):
+            print(random.choice([album['label'] for album in _allAlbums]))
+        return
+
+    if _searchType == VoiceCommand.HELP:
+        printVoiceCommand()
+        return
+
+    print("Cannot execute: {}".format(_cmd))
 
 def playAlbum(album):
     l.info(album)

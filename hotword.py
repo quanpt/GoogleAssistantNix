@@ -27,8 +27,15 @@ import google.oauth2.credentials
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
+from googlesamples.assistant.grpc import audio_helpers
 
 from apps import kodi
+from sound import amixer
+
+import logging as l
+
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+l.basicConfig(level=l.ERROR, format=FORMAT)
 
 def process_event(event, assistant):
     """Pretty prints events.
@@ -40,15 +47,21 @@ def process_event(event, assistant):
         event(event.Event): The current event to process.
     """
     if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
-        print()
+        print("Listening ...")
+        amixer.setLowSoundLevel()
 
-    print(event)
+    l.info(event)
 
     if event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED:
+        amixer.restoreSoundLevel()
         spokenText = event.args['text']
+        print("Command: {}".format(spokenText))
         if kodi.isValidCommand(spokenText):
-            kodi.executeCommand(spokenText)
+            print("  executing  ")
+            kodi.executeCommand()
             assistant.stop_conversation()
+        else:
+            print("  use Google Assistant")
 
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
