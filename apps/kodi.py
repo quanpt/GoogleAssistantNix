@@ -62,15 +62,9 @@ def is_valid_command(spoken_text):
     _cmd = spoken_text
     init_conversation()
 
-    for cmd in VoiceCommand:
-        match = re.search(cmd.value, spoken_text, flags=re.IGNORECASE)
-        if match:
-            _searchType = cmd
-            if cmd in [VoiceCommand.ARTIST, VoiceCommand.ALBUM]:
-                _searchParam1 = match.group(1).lower()
-            return True
+    (_searchType, _searchParam1) = VoiceCommand.extract_data(spoken_text)
 
-    return False
+    return _searchType is None
 
 
 def execute_command():
