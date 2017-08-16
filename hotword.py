@@ -26,15 +26,16 @@ import google.oauth2.credentials
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
+from google.auth.exceptions import  TransportError
 
-from apps import kodi
+from apps import controller
 from sound import amixer
 from voice import command
 
 import logging as l
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-l.basicConfig(level=l.ERROR, format=FORMAT)
+l.basicConfig(level=l.DEBUG, format=FORMAT)
 
 
 def process_event(event, assistant):
@@ -55,9 +56,9 @@ def process_event(event, assistant):
     if event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED:
         spoken_text = event.args['text']
         print("Command: {}".format(spoken_text))
-        if kodi.is_valid_command(spoken_text):
+        if controller.is_valid_command(spoken_text):
             print("  executing  ")
-            kodi.execute_command()
+            controller.execute_command()
             assistant.stop_conversation()
         else:
             print("  use Google Assistant")
@@ -84,12 +85,15 @@ def main():
         credentials = google.oauth2.credentials.Credentials(token=None,
                                                             **json.load(f))
 
-    with Assistant(credentials) as assistant:
-        assistant.set_mic_mute(False)
-        kodi.init_database()
-        command.VoiceCommand.print_voice_command()
-        for event in assistant.start():
-            process_event(event, assistant)
+    try:
+        with Assistant(credentials) as assistant:
+            assistant.set_mic_mute(False)
+            controller.init_database()
+            command.VoiceCommand.print_voice_command()
+            for event in assistant.start():
+                process_event(event, assistant)
+    except TransportError:
+        print("ERROR: Connection Error, please try again later!")
 
 
 if __name__ == '__main__':

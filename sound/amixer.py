@@ -1,12 +1,15 @@
 import subprocess, re, os
 
 _currentSoundLevel = 0
-
+_maxSoundLevel = 0
 
 def get_sound_level():
+    global _maxSoundLevel
     result = subprocess.run(["amixer", "-D", "pulse", "get", "Master"], stdout=subprocess.PIPE)
-    return re.search(r'^.*Playback ([\d]+) .*$',
-                                   [x for x in result.stdout.decode('utf-8').split('\n') if x.find('[on]') > 0][0]).group(1)
+    _maxSoundLevel = int(re.search(r'^.*Limits: Playback\s*0 - ([\d]+).*$',
+                                   [x for x in result.stdout.decode('utf-8').split('\n') if x.find('Limits: Playback') > 0][0]).group(1))
+    return int(re.search(r'^.*Playback ([\d]+) .*$',
+                                   [x for x in result.stdout.decode('utf-8').split('\n') if x.find('[on]') > 0][0]).group(1))
 
 
 def save_sound_level():
@@ -27,13 +30,14 @@ def restore_sound_level():
 
 def volume_up():
     global _currentSoundLevel
-    _currentSoundLevel *= 1.2
+    _currentSoundLevel += _maxSoundLevel * 0.2
     print("Sound level: {}".format(_currentSoundLevel))
 
 
 def volume_down():
     global _currentSoundLevel
-    _currentSoundLevel *= 0.8
+    _currentSoundLevel -= _maxSoundLevel * 0.2
+    _currentSoundLevel = 0 if _currentSoundLevel < 0 else _currentSoundLevel
     print("Sound level: {}".format(_currentSoundLevel))
 
 

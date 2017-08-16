@@ -7,9 +7,10 @@ from subprocess import check_output, CalledProcessError
 sys.path.append('../')
 from voice.command import VoiceCommand
 from sound import amixer
+from utils.maths import text2int
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-l.basicConfig(level=l.ERROR, format=FORMAT)
+l.basicConfig(level=l.DEBUG, format=FORMAT)
 warnings.filterwarnings("ignore", category=UserWarning, module='urllib')
 
 # search param
@@ -17,14 +18,20 @@ _cmd = ''
 _searchType = None
 _searchParam1 = ''
 
-# database
+# database & contants
 _kodi_url = "http://localhost:8080/jsonrpc"
 _allAlbums = []
+_range = 10
+
+# last search
+_shownArtists = []
+_shownSongs = []
+_lastSearchType = None
 
 
 def get_pid(name):
     try:
-        return check_output(["pidof",name])
+        return int(check_output(["pidof",name]).decode('utf-8'))
     except CalledProcessError:
         return -1
 
@@ -42,7 +49,7 @@ def request_kodi_rpc(param_dict):
 def init_database():
     global _allAlbums
 
-    if get_pid('kodi') < 0:
+    if get_pid('kodi.bin') < 0:
         print('Error: please start Kodi first')
         sys.exit(-1)
 
@@ -79,10 +86,13 @@ def is_valid_command(spoken_text):
 
     (_searchType, _searchParam1) = VoiceCommand.extract_data(spoken_text)
 
-    return _searchType is None
+    return _searchType is not None
 
 
 def execute_command():
+
+    global _shownArtists, _shownSongs, _lastSearchType
+    _lastSearchType = _searchType
 
     l.info([_searchType, _searchParam1])
 
@@ -109,13 +119,22 @@ def execute_command():
             for y in x:
                 output.add(y)
         artist_list = list(output)
-        for _ in range(10):
-            print(random.choice(artist_list))
+        _shownArtists = []
+        for _ in range(_range):
+            _shownArtists.append(random.choice(artist_list))
+            print('\n'.join(['    {}. {}'.format(str(index + 1), _shownArtists[index]) for index in range(_range)]))
         return
 
     if _searchType == VoiceCommand.SHOW_ALBUM:
-        for _ in range(10):
-            print(random.choice([album['label'] for album in _allAlbums]))
+        _shownSongs = []
+        for _ in range(_range):
+            _shownSongs.append(random.choice([album['label'] for album in _allAlbums]))
+        print('\n'.join(['    {}. {}'.format(str(index+1), _shownSongs[index]) for index in range(_range)]))
+        return
+
+    if _searchType == VoiceCommand.PLAY_NUMBER:
+        if _lastSearchType == VoiceCommand.SHOW_ALBUM:
+            label = _shownSongs[text2int(_searchParam1)]
         return
 
     if _searchType == VoiceCommand.PLAY_RANDOM:
