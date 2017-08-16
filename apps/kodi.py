@@ -13,7 +13,12 @@
 # limitations under the License.
 
 
-import urllib.request, json, random, sys, re
+import urllib.request
+import json
+import random
+import sys
+import re
+
 from utils.sys import get_pid
 from utils.maths import text2int
 
@@ -72,14 +77,14 @@ def init_database():
 
 def play_album(album):
     l.info(album)
-    paramOpen = {"jsonrpc": "2.0", "id": 1, "method": "Player.Open", "params": {"item": {"albumid": album['albumid']}}}
-    result = request_kodi_rpc(paramOpen)
+    param_open = {"jsonrpc": "2.0", "id": 1, "method": "Player.Open", "params": {"item": {"albumid": album['albumid']}}}
+    result = request_kodi_rpc(param_open)
     l.info('result: {}'.format(result))
 
 
-def search_play_album(album):
+def search_play_album(label):
     for album in _allAlbums:
-        if re.search(album, album['label'], re.IGNORECASE):
+        if re.search(label, album['label'], re.IGNORECASE):
             play_album(album)
             return True
     return False

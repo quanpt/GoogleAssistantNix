@@ -97,6 +97,10 @@ def execute_command():
     print("Cannot execute: {}".format(_cmd))
 
 
+def init_database():
+    kodi.init_database()
+
+
 def main():
     kodi.init_database()
     cmds = """play artist Elvis Presley please
@@ -110,7 +114,3 @@ help""".split('\n')
 
 if __name__ == '__main__':
     main()
-
-
-def init_database():
-    kodi.init_database()

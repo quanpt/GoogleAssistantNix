@@ -16,6 +16,7 @@
 from enum import Enum
 import re
 
+
 class VoiceCommand(Enum):
     ALBUM = r'play song (.*)'
     ARTIST = r'play singer (.*)'
@@ -41,5 +42,5 @@ class VoiceCommand(Enum):
             if match:
                 if cmd in [VoiceCommand.ARTIST, VoiceCommand.ALBUM]:
                     search_param_1 = match.group(1).lower()
-                return (cmd, search_param_1)
-        return (None, None)
+                return cmd, search_param_1
+        return None, None
