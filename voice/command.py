@@ -24,7 +24,9 @@ class VoiceCommand(Enum):
     SHOW_ALBUM = r'show me some songs'
     PLAY_RANDOM = r'play some random songs'
     PLAY_NUMBER = r'play number (.*)'
+    STOP_PLAY = r'stop(.*)'
     VOLUME_UP = r'volume up'
+    VOLUME_MAX = r'volume max'
     VOLUME_DOWN = r'volume down'
     HELP = r'help'
 
@@ -40,7 +42,7 @@ class VoiceCommand(Enum):
         for cmd in VoiceCommand:
             match = re.search(cmd.value, spoken_text, flags=re.IGNORECASE)
             if match:
-                if cmd in [VoiceCommand.ARTIST, VoiceCommand.ALBUM]:
+                if cmd in [VoiceCommand.ARTIST, VoiceCommand.ALBUM, VoiceCommand.PLAY_NUMBER]:
                     search_param_1 = match.group(1).lower()
                 return cmd, search_param_1
         return None, None

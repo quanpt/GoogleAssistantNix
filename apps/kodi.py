@@ -46,6 +46,7 @@ def request_kodi_rpc(param_dict):
 
     with urllib.request.urlopen(req) as url:
         data = json.loads(url.read().decode())
+        l.info('result: {}'.format(data['result']))
         return data['result']
 
 
@@ -79,10 +80,17 @@ def play_album(album):
     l.info(album)
     param_open = {"jsonrpc": "2.0", "id": 1, "method": "Player.Open", "params": {"item": {"albumid": album['albumid']}}}
     result = request_kodi_rpc(param_open)
-    l.info('result: {}'.format(result))
 
+
+def stop_audio():
+    param_get_player = {"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}
+    for player in request_kodi_rpc(param_get_player):
+        param_stop = {"jsonrpc": "2.0", "method": "Player.Stop", "params": {"playerid": player['playerid']}, "id": 1}
+        request_kodi_rpc(param_stop)
+    return True
 
 def search_play_album(label):
+    l.info(label)
     for album in _allAlbums:
         if re.search(label, album['label'], re.IGNORECASE):
             play_album(album)
@@ -114,7 +122,7 @@ def show_artist():
     _shownArtists = []
     for _ in range(_range):
         _shownArtists.append(random.choice(artist_list))
-        print('\n'.join(['    {}. {}'.format(str(index + 1), _shownArtists[index]) for index in range(_range)]))
+    print('\n'.join(['    {}. {}'.format(str(index + 1), _shownArtists[index]) for index in range(_range)]))
 
 
 def show_albums():
@@ -130,10 +138,25 @@ def play_random():
 
 
 def play_number_from_album_list(number):
-    label = _shownSongs[text2int(number)]
+    try:
+        index = int(number)
+    except ValueError:
+        index = text2int(number)
+    label = _shownSongs[index - 1]
     search_play_album(label)
 
 
 def play_number_from_artist_list(number):
-    name = _shownArtists[text2int(number)]
+    try:
+        index = int(number)
+    except ValueError:
+        index = text2int(number)
+    name = _shownArtists[index - 1]
     search_play_artist(name)
+
+def main():
+    stop_audio()
+
+if __name__ == '__main__':
+    init_database()
+    main()

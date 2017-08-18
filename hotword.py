@@ -57,9 +57,9 @@ def process_event(event, assistant):
         spoken_text = event.args['text']
         print("Command: {}".format(spoken_text))
         if controller.is_valid_command(spoken_text):
+            assistant.stop_conversation()
             print("  executing  ")
             controller.execute_command()
-            assistant.stop_conversation()
         else:
             print("  use Google Assistant")
         amixer.restore_sound_level()

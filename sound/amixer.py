@@ -48,6 +48,11 @@ def volume_up():
     _currentSoundLevel += _maxSoundLevel * 0.2
     print("Sound level: {}".format(_currentSoundLevel))
 
+def volume_max():
+    global _currentSoundLevel
+    _currentSoundLevel = _maxSoundLevel
+    print("Sound level: {}".format(_currentSoundLevel))
+
 
 def volume_down():
     global _currentSoundLevel

@@ -55,7 +55,6 @@ def is_valid_command(spoken_text):
 def execute_command():
 
     global _shownArtists, _shownSongs, _lastSearchType
-    _lastSearchType = _searchType
 
     l.info([_searchType, _searchParam1])
 
@@ -68,9 +67,11 @@ def execute_command():
             return
 
     if _searchType == VoiceCommand.SHOW_ARTIST:
+        _lastSearchType = _searchType
         return kodi.show_artist()
 
     if _searchType == VoiceCommand.SHOW_ALBUM:
+        _lastSearchType = _searchType
         return kodi.show_albums()
 
     if _searchType == VoiceCommand.PLAY_NUMBER:
@@ -82,8 +83,15 @@ def execute_command():
     if _searchType == VoiceCommand.PLAY_RANDOM:
         return kodi.play_random()
 
+    if _searchType == VoiceCommand.STOP_PLAY:
+        return kodi.stop_audio()
+
     if _searchType == VoiceCommand.VOLUME_UP:
         amixer.volume_up()
+        return
+
+    if _searchType == VoiceCommand.VOLUME_MAX:
+        amixer.volume_max()
         return
 
     if _searchType == VoiceCommand.VOLUME_DOWN:
@@ -103,10 +111,9 @@ def init_database():
 
 def main():
     kodi.init_database()
-    cmds = """play artist Elvis Presley please
-play artist Celine Dion please
-play album Relaxation Music Orchestra please
-help""".split('\n')
+    cmds = """help
+show me some songs
+play number 2""".split('\n')
     for cmd in cmds:
         print(cmd)
         if is_valid_command(cmd):
