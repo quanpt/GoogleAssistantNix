@@ -10,6 +10,7 @@ from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 
 import logging as l
+
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 l.basicConfig(level=l.WARN, format=FORMAT)
 
@@ -76,10 +77,11 @@ def search_list_by_keyword(service, **kwargs):
 def search_play_album(label):
     service = get_authenticated_service(None)
     results = search_list_by_keyword(service,
-                           part='snippet',
-                           maxResults=1,
-                           q=label,
-                           type='playlist')
+                                     safeSearch='strict',
+                                     part='snippet',
+                                     maxResults=1,
+                                     q=label,
+                                     type='playlist')
     item = results['items'][0]
     l.info(item)
     play_album((item['id']['playlistId'], item['snippet']['title']))
@@ -88,10 +90,11 @@ def search_play_album(label):
 def search_play_song(label):
     service = get_authenticated_service(None)
     results = search_list_by_keyword(service,
-                           part='snippet',
-                           maxResults=1,
-                           q=label,
-                           type='video')
+                                     safeSearch='strict',
+                                     part='snippet',
+                                     maxResults=1,
+                                     q=label,
+                                     type='video')
     item = results['items'][0]
     l.info(item)
     play_song((item['id']['videoId'], item['snippet']['title']))
@@ -121,6 +124,7 @@ def play_song(video_item):
 
 def main():
     search_play_song('katy perry roar')
+
 
 if __name__ == '__main__':
     main()
