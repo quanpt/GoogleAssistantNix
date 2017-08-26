@@ -19,7 +19,7 @@ import warnings
 from voice.command import VoiceCommand
 from sound import amixer
 
-from apps import kodi
+from apps import kodi, youtube
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 l.basicConfig(level=l.DEBUG, format=FORMAT)
@@ -100,6 +100,12 @@ def execute_command():
     if _searchType == VoiceCommand.VOLUME_DOWN:
         amixer.volume_down()
         return
+
+    if _searchType == VoiceCommand.YT_PLAY_SONG:
+        return youtube.search_play_song(_searchParam1)
+
+    if _searchType == VoiceCommand.YT_PLAY_LIST:
+        return youtube.search_play_album(_searchParam1)
 
     if _searchType == VoiceCommand.HELP:
         VoiceCommand.print_voice_command()

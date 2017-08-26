@@ -11,7 +11,7 @@ from oauth2client.tools import argparser, run_flow
 
 import logging as l
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-l.basicConfig(level=l.INFO, format=FORMAT)
+l.basicConfig(level=l.WARN, format=FORMAT)
 
 # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
 # the OAuth 2.0 information for this application, including its client_id and

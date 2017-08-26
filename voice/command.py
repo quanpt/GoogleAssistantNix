@@ -29,6 +29,9 @@ class VoiceCommand(Enum):
     VOLUME_UP = r'volume up'
     VOLUME_MAX = r'volume max'
     VOLUME_DOWN = r'volume down'
+    YT_PLAY_SONG = r'youtube song (.*)'
+    YT_PLAY_LIST = r'youtube list (.*)'
+
     HELP = r'help'
 
     @staticmethod
@@ -36,6 +39,7 @@ class VoiceCommand(Enum):
         print("Available voice command:")
         for cmd in VoiceCommand:
             print('    {}'.format(cmd.value))
+        print()
 
     @staticmethod
     def extract_data(spoken_text):
@@ -43,7 +47,8 @@ class VoiceCommand(Enum):
         for cmd in VoiceCommand:
             match = re.search(cmd.value, spoken_text, flags=re.IGNORECASE)
             if match:
-                if cmd in [VoiceCommand.ARTIST, VoiceCommand.ALBUM, VoiceCommand.PLAY_NUMBER]:
+                if cmd.value.find('.*') > 0:
                     search_param_1 = match.group(1).lower()
+                print('  Command "{}": "{}"'.format(cmd.value, search_param_1))
                 return cmd, search_param_1
         return None, None

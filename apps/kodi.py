@@ -25,7 +25,7 @@ from utils.maths import text2int
 import logging as l
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-l.basicConfig(level=l.DEBUG, format=FORMAT)
+l.basicConfig(level=l.INFO, format=FORMAT)
 
 # database & constants
 _kodi_url = "http://localhost:8080/jsonrpc"
@@ -44,7 +44,6 @@ def request_kodi_rpc(param_dict):
 
     with urllib.request.urlopen(req) as url:
         data = json.loads(url.read().decode())
-        l.info('result: {}'.format(data['result']))
         return data['result']
 
 
