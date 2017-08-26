@@ -24,6 +24,7 @@ class VoiceCommand(Enum):
     SHOW_ALBUM = r'show me some songs'
     PLAY_RANDOM = r'play some random songs'
     PLAY_NUMBER = r'play number (.*)'
+    PLAY_NEXT = r'play next(.*)'
     STOP_PLAY = r'stop(.*)'
     VOLUME_UP = r'volume up'
     VOLUME_MAX = r'volume max'

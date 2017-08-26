@@ -19,7 +19,7 @@ import warnings
 from voice.command import VoiceCommand
 from sound import amixer
 
-from . import kodi
+from apps import kodi
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 l.basicConfig(level=l.DEBUG, format=FORMAT)
@@ -82,6 +82,9 @@ def execute_command():
 
     if _searchType == VoiceCommand.PLAY_RANDOM:
         return kodi.play_random()
+
+    if _searchType == VoiceCommand.PLAY_NEXT:
+        return kodi.play_next()
 
     if _searchType == VoiceCommand.STOP_PLAY:
         return kodi.stop_audio()

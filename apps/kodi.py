@@ -22,17 +22,15 @@ import re
 from utils.sys import get_pid
 from utils.maths import text2int
 
-
 import logging as l
+
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 l.basicConfig(level=l.DEBUG, format=FORMAT)
-
 
 # database & constants
 _kodi_url = "http://localhost:8080/jsonrpc"
 _allAlbums = []
 _range = 10
-
 
 # last search
 _shownArtists = []
@@ -50,9 +48,7 @@ def request_kodi_rpc(param_dict):
         return data['result']
 
 
-def init_database():
-    global _allAlbums
-
+def init_authorisation():
     if get_pid('kodi.bin') < 0:
         print('Error: please start Kodi first')
         sys.exit(-1)
@@ -63,6 +59,10 @@ def init_database():
     handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
     opener = urllib.request.build_opener(handler)
     urllib.request.install_opener(opener)
+
+
+def init_database():
+    global _allAlbums
 
     def get_albums(order_by):
         param_get_albums = {"jsonrpc": "2.0", "method": "AudioLibrary.GetAlbums",
@@ -82,12 +82,48 @@ def play_album(album):
     result = request_kodi_rpc(param_open)
 
 
+def play_youtube_song(video_id):
+    param_open = {"jsonrpc": "2.0", "id": "1", "method": "Player.Open",
+                  "params": {"item": {"file": "plugin://plugin.video.youtube/?path=/root/video&action=play_video&videoid=" + video_id}}}
+    result = request_kodi_rpc(param_open)
+    l.info(result)
+
+
+def play_youtube_album(video_id):
+    param_open = {"jsonrpc": "2.0", "method": "Playlist.Clear", "params": {"playlistid": 1}, "id": 1}
+    result = request_kodi_rpc(param_open)
+
+    param_open = {"jsonrpc": "2.0", "method": "Player.Open",
+                  "params": {"item": {"file": "plugin://plugin.video.youtube/play/?playlist_id=" + video_id + "&order=default&play=1"}}, "id": 2}
+    result = request_kodi_rpc(param_open)
+
+    #param_open = {"jsonrpc": "2.0", "method": "Player.Open", "params": {"item": {"playlistid": 1, "position": 0}}, "id": 3}
+    #result = request_kodi_rpc(param_open)
+
+    l.info(param_open)
+    l.info(result)
+    # [{"jsonrpc": "2.0", "method": "Playlist.Clear", "params": {"playlistid": 1}, "id": 1},
+    #  {"jsonrpc": "2.0", "method": "Player.Open",
+    #   "params": {"item": {"file": "plugin://plugin.video.youtube/play/?playlist_id=SOME_YT_PLAYLIST_ID"}}, "id": 2},
+    #  {"jsonrpc": "2.0", "method": "Player.Open", "params": {"item": {"playlistid": 1, "position": 0}}, "id": 3}]
+
+
+def play_next():
+    param_get_player = {"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}
+    for player in request_kodi_rpc(param_get_player):
+        param_next = {"jsonrpc": "2.0", "method": "Player.GoTo",
+                      "params": {"playerid": player['playerid'], "to": "next"}, "id": 1}
+        request_kodi_rpc(param_next)
+    return True
+
+
 def stop_audio():
     param_get_player = {"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}
     for player in request_kodi_rpc(param_get_player):
         param_stop = {"jsonrpc": "2.0", "method": "Player.Stop", "params": {"playerid": player['playerid']}, "id": 1}
         request_kodi_rpc(param_stop)
     return True
+
 
 def search_play_album(label):
     l.info(label)
@@ -154,9 +190,11 @@ def play_number_from_artist_list(number):
     name = _shownArtists[index - 1]
     search_play_artist(name)
 
-def main():
-    stop_audio()
 
+def main():
+    play_youtube_album('PLougCVpA6za1ekshDLUoy0Ragmmi5GOaF')
+
+init_authorisation()
 if __name__ == '__main__':
     init_database()
     main()
