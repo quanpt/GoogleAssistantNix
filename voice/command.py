@@ -30,8 +30,8 @@ class VoiceCommand(Enum):
     VOLUME_MAX = r'volume max'
     VOLUME_DOWN = r'volume down'
     YT_PLAY = r'youtube (.*)'
-    # YT_PLAY_SONG = r'youtube song (.*)'
-    # YT_PLAY_LIST = r'youtube list (.*)'
+    YT_PLAY_SONG = r'youtube song (.*)' # non-effective
+    YT_PLAY_LIST = r'youtube list (.*)' # non-effective
     KD_INIT_DB = r'restart system(.*)'
 
     HELP = r'help'
