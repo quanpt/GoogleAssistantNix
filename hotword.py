@@ -20,6 +20,7 @@ from __future__ import print_function
 import argparse
 import os.path
 import json
+import os
 
 import google.oauth2.credentials
 
@@ -49,6 +50,7 @@ def process_event(event, assistant):
     """
     if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
         print("Listening ...")
+        bell()
         amixer.set_low_sound_level()
 
     l.info(event)
@@ -67,6 +69,12 @@ def process_event(event, assistant):
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
         print('Done')
+
+
+def bell():
+    duration = 0.1  # second
+    freq = 440  # Hz
+    os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
 
 
 def main():

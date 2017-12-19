@@ -20,9 +20,10 @@ from voice.command import VoiceCommand
 from sound import amixer
 
 from apps import kodi, youtube
+from apps import mps_youtube as mpsyt
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-l.basicConfig(level=l.DEBUG, format=FORMAT)
+l.basicConfig(level=l.WARN, format=FORMAT)
 warnings.filterwarnings("ignore", category=UserWarning, module='urllib')
 
 # search param
@@ -101,6 +102,9 @@ def execute_command():
         amixer.volume_down()
         return
 
+    if _searchType == VoiceCommand.YT_PLAY:
+        mpsyt.search_play_song(_searchParam1)
+
     if _searchType == VoiceCommand.YT_PLAY_SONG:
         return youtube.search_play_song(_searchParam1)
 
@@ -110,6 +114,9 @@ def execute_command():
     if _searchType == VoiceCommand.HELP:
         VoiceCommand.print_voice_command()
         return
+
+    if _searchType == VoiceCommand.KD_INIT_DB:
+        kodi.init_database()
 
     print("Cannot execute: {}".format(_cmd))
 

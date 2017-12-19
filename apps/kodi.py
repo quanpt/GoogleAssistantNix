@@ -36,8 +36,12 @@ _range = 10
 _shownArtists = []
 _shownSongs = []
 
+_kodiOff = False
+
 
 def request_kodi_rpc(param_dict):
+    if _kodiOff:
+        return
     params = json.dumps(param_dict).encode('utf8')
     req = urllib.request.Request(_kodi_url, data=params,
                                  headers={'content-type': 'application/json'})
@@ -48,9 +52,13 @@ def request_kodi_rpc(param_dict):
 
 
 def init_authorisation():
+    global _kodiOff
     if get_pid('kodi.bin') < 0:
         print('Error: please start Kodi first')
-        sys.exit(-1)
+        _kodiOff = True
+        # sys.exit(-1)
+    else:
+        _kodiOff = False
 
     # https://stackoverflow.com/questions/44239822/urllib-request-urlopenurl-with-authentication
     password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
@@ -61,6 +69,9 @@ def init_authorisation():
 
 
 def init_database():
+    init_authorisation()
+    if _kodiOff:
+        return
     global _allAlbums
 
     def get_albums(order_by):
@@ -191,9 +202,9 @@ def play_number_from_artist_list(number):
 
 
 def main():
+    init_authorisation()
     play_youtube_album('PLougCVpA6za1ekshDLUoy0Ragmmi5GOaF')
 
-init_authorisation()
 if __name__ == '__main__':
     init_database()
     main()
